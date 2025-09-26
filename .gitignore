@@ -1,0 +1,39 @@
+# --- Secrets ---
+# This is the most important rule. Never commit your secret API keys.
+.env
+
+# --- Python / Backend ---
+# Ignore Python's bytecode directories
+__pycache__/
+*.pyc
+
+# Ignore Python virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Ignore testing artifacts
+.pytest_cache/
+
+# --- Node.js / Frontend ---
+# This is the second most important rule. This folder is huge and can
+# be recreated by running `npm install`.
+node_modules/
+
+# Ignore the production build output directory
+dist/
+
+# Ignore crash logs and debug files
+npm-debug.log*
+yarn-error.log
+yarn-debug.log
+
+# --- IDE / Editor and OS Files ---
+# Ignore OS-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE configuration folders
+.idea/
+.vscode/
