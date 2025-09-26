@@ -1,0 +1,68 @@
+
+services:
+  # Redis Caching Service
+  redis:
+    image: "redis:7-alpine"
+    container_name: egyptweather_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Backend API Service (FastAPI)
+  backend:
+    container_name: egyptweather_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/usr/src/app  # Mount for live-reloading in development
+    env_file:
+      - .env  # Load environment variables from .env file
+    depends_on:
+      - redis
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  
+  
+  
+  
+  
+  # Frontend Web Service (Simplified for Development)
+  frontend:
+    container_name: egyptweather_frontend
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      # This prevents the local node_modules from overwriting the one in the container
+      - /app/node_modules
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  # Frontend Web Service (React/Nginx)
+  
+volumes:
+  redis_data:
