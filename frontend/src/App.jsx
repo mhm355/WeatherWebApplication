@@ -1,25 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { fetchWeather } from './api/weatherApi';
+import './App.css';
 
-// Basic styling - in a real app, this would be in a CSS file
-const styles = {
-    container: { fontFamily: 'Arial, sans-serif', padding: '20px', maxWidth: '800px', margin: 'auto' },
-    header: { textAlign: 'center', marginBottom: '20px' },
-    searchBar: { display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' },
-    input: { padding: '10px', fontSize: '16px' },
-    button: { padding: '10px', fontSize: '16px' },
-    weatherContainer: { border: '1px solid #ccc', borderRadius: '8px', padding: '20px' },
-    currentWeather: { textAlign: 'center', marginBottom: '20px' },
-    forecast: { display: 'flex', justifyContent: 'space-between', textAlign: 'center' },
-    forecastDay: { border: '1px solid #eee', borderRadius: '4px', padding: '10px' },
-    loading: { textAlign: 'center', fontSize: '20px' },
-    error: { textAlign: 'center', fontSize: '20px', color: 'red' }
+// Import icons from the 'Weather Icons' set
+import {
+  WiDaySunny, WiDayCloudy, WiCloud, WiCloudy, WiShowers,
+  WiRain, WiThunderstorm, WiSnow, WiFog, WiNightClear,
+  WiNightCloudy, WiNightShowers, WiNightRain, WiNightThunderstorm,
+  WiNightSnow, WiNightFog, WiThermometer, WiStrongWind, WiHumidity
+} from 'react-icons/wi';
+
+// Helper function to map API icon codes to react-icons
+const getWeatherIcon = (iconCode) => {
+  switch (iconCode) {
+    case '01d': return <WiDaySunny />;
+    case '01n': return <WiNightClear />;
+    case '02d': return <WiDayCloudy />;
+    case '02n': return <WiNightCloudy />;
+    case '03d': case '03n': return <WiCloud />;
+    case '04d': case '04n': return <WiCloudy />;
+    case '09d': case '09n': return <WiShowers />;
+    case '10d': return <WiRain />;
+    case '10n': return <WiNightRain />;
+    case '11d': case '11n': return <WiThunderstorm />;
+    case '13d': case '13n': return <WiSnow />;
+    case '50d': case '50n': return <WiFog />;
+    default: return <WiDaySunny />;
+  }
 };
 
 function App() {
-    const [city, setCity] = useState('Cairo');
+    const [city, setCity] = useState('');
     const [weatherData, setWeatherData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const loadWeather = async (params) => {
@@ -36,15 +49,10 @@ function App() {
         }
     };
 
-    // Initial load for default city
-    useEffect(() => {
-        loadWeather({ city: 'Cairo' });
-    }, []);
-
     const handleSearch = () => {
         if (city) loadWeather({ city });
     };
-    
+
     const handleGeoLocation = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
@@ -58,41 +66,50 @@ function App() {
         }
     };
 
+    // --- NEW FUNCTION: Handles the key press event ---
+    const handleKeyPress = (event) => {
+      // Check if the key pressed was "Enter"
+      if (event.key === 'Enter') {
+        handleSearch();
+      }
+    };
+
     return (
-        <div style={styles.container}>
-            <h1 style={styles.header}>EgyptWeather</h1>
-            <div style={styles.searchBar}>
+        <div className="weather-widget">
+            <div className="search-bar">
                 <input
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="Enter city name"
-                    style={styles.input}
+                    onKeyDown={handleKeyPress} // <-- ADD THIS to the input element
+                    placeholder="Enter city name..."
                 />
-                <button onClick={handleSearch} style={styles.button}>Search</button>
-                <button onClick={handleGeoLocation} style={styles.button}>Use My Location</button>
+                <button onClick={handleSearch}>Search</button>
+                <button onClick={handleGeoLocation}>Use My Location</button>
             </div>
-            
-            {loading && <p style={styles.loading}>Loading...</p>}
-            {error && <p style={styles.error}>{error}</p>}
+
+            {loading && <p style={{ textAlign: 'center' }}>Loading weather...</p>}
+            {error && <p style={{ color: '#ff8a8a', textAlign: 'center' }}>{error}</p>}
 
             {weatherData && (
-                <div style={styles.weatherContainer}>
-                    <div style={styles.currentWeather}>
-                        <h2>Current Weather in {weatherData.location}</h2>
-                        <img src={`http://openweathermap.org/img/wn/${weatherData.current.icon}@2x.png`} alt={weatherData.current.condition} />
-                        <h3>{weatherData.current.temperature}°C - {weatherData.current.condition}</h3>
-                        <p>Humidity: {weatherData.current.humidity}% | Wind: {weatherData.current.wind_speed.toFixed(1)} km/h</p>
-                         {weatherData.alert && <p style={{color: 'orange', fontWeight: 'bold'}}>Alert: {weatherData.alert}</p>}
+                <div className="weather-display">
+                    <div className="current-weather">
+                        <h2>{weatherData.location}</h2>
+                        <div className="icon-wrapper">{getWeatherIcon(weatherData.current.icon)}</div>
+                        <p className="temperature">{weatherData.current.temperature.toFixed(0)}°C</p>
+                        <p className="condition">{weatherData.current.condition}</p>
+                        <div className="extra-details">
+                            <span><WiHumidity /> {weatherData.current.humidity}%</span>
+                            <span><WiStrongWind /> {weatherData.current.wind_speed.toFixed(1)} km/h</span>
+                        </div>
                     </div>
-                    <hr/>
-                    <h3>7-Day Forecast</h3>
-                    <div style={styles.forecast}>
+                    <div className="forecast-panel">
+                        <h3>7-Day Forecast</h3>
                         {weatherData.forecast.map(day => (
-                            <div key={day.date} style={styles.forecastDay}>
-                                <p><strong>{new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}</strong></p>
-                                <img src={`http://openweathermap.org/img/wn/${day.icon}.png`} alt={day.condition} />
-                                <p>{day.temp_max.toFixed(0)}° / {day.temp_min.toFixed(0)}°</p>
+                            <div key={day.date} className="forecast-day">
+                                <span>{new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                                <span className="icon-wrapper-small">{getWeatherIcon(day.icon)}</span>
+                                <span>{day.temp_max.toFixed(0)}° / {day.temp_min.toFixed(0)}°</span>
                             </div>
                         ))}
                     </div>
@@ -103,3 +120,4 @@ function App() {
 }
 
 export default App;
+
