@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import router as api_router
 
 app = FastAPI(
-    title="EgyptWeather API",
-    description="API for fetching weather data for the EgyptWeather application.",
+    title="CheckWeather API",
+    description="API for fetching weather data for the CheckWeather application.",
     version="1.0.0"
 )
 
